@@ -1,0 +1,90 @@
+# Reddit Prospect Radar: main configuration.
+# Every key is required unless noted. Invalid values stop the program at startup.
+# Relative paths are resolved against the project root (the parent of this directory).
+
+collector:
+  base: "https://old.reddit.com"       # or "https://www.reddit.com"; verified in milestone 2
+  headless: true
+  user_data_dir: "data/browser_profile"
+  logged_in: false                      # must stay false
+  min_delay_s: 6                        # min wait between page loads
+  max_delay_s: 18                       # max wait between page loads
+  max_pages_per_cycle: 25               # hard cap on page loads per cycle
+  max_post_age_hours: 24
+  cycle_interval_min: 20
+  cycle_jitter_min: 6                   # random +/- added to interval; must be less than the interval
+  quiet_hours: ["01:00", "06:00"]       # local time "HH:MM" (quoted), no collection; null to disable
+  sources:
+    # type subreddit_new: name
+    # type search: query, optional sort (default new), optional subreddit to restrict the search
+    - type: subreddit_new
+      name: SaaS
+    - type: subreddit_new
+      name: startups
+    - type: subreddit_new
+      name: indiehackers
+    - type: subreddit_new
+      name: Entrepreneur
+    - type: subreddit_new
+      name: smallbusiness
+    - type: subreddit_new
+      name: vibecoding
+    - type: subreddit_new
+      name: ChatGPTCoding
+    - type: subreddit_new
+      name: lovable
+    - type: subreddit_new
+      name: nocode
+    - type: subreddit_new
+      name: forhire
+    - type: search
+      query: '"works locally" production'
+      sort: new
+    - type: search
+      query: '"technical cofounder"'
+      sort: new
+  # The sources above are a starting set. Check each subreddit's rules
+  # and activity, and edit this list freely.
+
+thresholds:
+  fetch_body: 2          # rules score on title/snippet needed to open the post
+  ml_stage: 4            # rules score on full text needed to enter ML scoring
+  notify: 0.60           # final combined score (0..1) needed to notify
+
+ml:
+  mode: similarity       # similarity | similarity+zeroshot | classifier
+  embedding_model: "BAAI/bge-small-en-v1.5"
+  zeroshot_model: "MoritzLaurer/deberta-v3-base-zeroshot-v2.0"
+  max_chars: 2000        # truncate post text before ML
+  classifier_min_labels: 100
+
+weights:                 # used to combine stage scores; must sum to 1 within each mode
+  similarity:
+    rules: 0.35
+    embedding: 0.65
+  similarity+zeroshot:
+    rules: 0.25
+    embedding: 0.40
+    zeroshot: 0.35
+  classifier:
+    rules: 0.20
+    classifier: 0.80
+
+notify:
+  telegram_enabled: true
+  daily_digest_time: "21:00"        # local time "HH:MM" (quoted)
+  max_notifications_per_day: 30     # safety valve
+
+draft:
+  enabled: false                    # opt-in
+  model: "claude-sonnet-5-5"
+  max_tokens: 500
+  on_demand_only: true              # draft only when the owner taps "Draft reply"
+
+storage:
+  data_dir: "data"                  # database, logs, html snapshots, trained models
+
+logging:
+  level: INFO                       # DEBUG | INFO | WARNING | ERROR
+  max_file_mb: 5                    # rotate the log file at this size
+  backup_count: 5                   # rotated files to keep

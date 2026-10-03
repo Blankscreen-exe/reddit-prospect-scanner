@@ -20,3 +20,15 @@ Record any implementation decision the spec leaves open in `docs/DECISIONS.md`.
 - **Build to production quality.** Not every production feature will ship now: each feature will grow over time by expanding around its edges. But every feature that is built must be built in its best, correct form from the start.
 - **No "it doesn't need proper work yet" decisions.** Do not cut corners because a feature is at an early stage.
 - **No workarounds unless the owner explicitly permits them.** The goal is never to have to go back to a feature because a workaround was built instead of the correct implementation. If the correct implementation is blocked, stop and ask rather than working around it.
+
+## Commands
+
+```bash
+uv sync                                # install (runtime + dev)
+uv run prospect-radar --help           # CLI
+uv run pytest                          # tests
+uv run ruff format . && uv run ruff check .
+uv run mypy                            # strict type check of src and tests
+```
+
+All four checks (format, lint, mypy, pytest) must pass before a milestone is reported done.
